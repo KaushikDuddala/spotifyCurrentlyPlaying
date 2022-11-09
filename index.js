@@ -55,41 +55,30 @@ async function retrieve(){
 				break
 			case 200:
 				const format = await res.json();
-				if(format.currently_playing_type == 'ad'){return console.log("Playing an ad currently.")}
-				let progress = Math.round(format.progress_ms/1000)
-				let pMin = 0;
-				let length = Math.round(format.item.duration_ms/1000)
-				let pLen = 0;
-				let currentProg = Math.round((format.item.duration_ms - format.progress_ms )/1000)
-				let currentPrUnRound = (format.item.duration_ms - format.progress_ms )
-				let cProgMin = 0;
-				let forCurProg = currentProg
-				while(forCurProg > 60){
-					cProgMin++
-					forCurProg = forCurProg-60
-				}
+				if(format.currently_playing_type == 'ad') return console.log("Playing an ad currently.")
+				let progress /* Progress of the song */ = Math.round(format.progress_ms/1000)
+				let pMin /* Progress in minutes */ = 0;
+				let length /* Length of the song */ = Math.round(format.item.duration_ms/1000)
+				let pLenMinutes /* Length of the progress of the song in minutes */ = 0;
+				/* Caluclate current progress for minutes/seconds */
 				while (progress > 60){
 					pMin++
 					progress = progress-60
-					
 				}
 				while(length > 60){
-					pLen++
-					
+					pLenMinutes++
 					length = length - 60
 				}
 				const current = {
 					name:format.item.name,
 					link:format.item.external_urls.spotify,
-					albumLink:format.context.external_urls.spotify,
 					albumName:format.item.album.name,
-					progressFormatted:`${pMin}:${progress}`,
-					progress:format.progress_ms,
-					lengthFormatted:`${pLen}:${length}`,
-					length:format.item.duration_ms,
+					albumLink:format.context.external_urls.spotify,
 					albumImage:format.item.album.images[0].url,
-					prog:currentProg,
-					endTimestamp:`${Math.round((Date.now() / 1000)+currentProg)}`
+					progressFormatted:`${pMin}:${progress}`,
+					lengthFormatted:`${pLenMinutes}:${length}`,
+					progress:format.progress_ms,
+					length:format.item.duration_ms,
 				}
 				return console.log(current)
 				break
@@ -102,4 +91,4 @@ async function retrieve(){
 }
 
 /* Setting repeating grab */
-setInterval(async () => {await retrieve()}, 5000)
+setInterval(async () => {await retrieve()}, 1000)
