@@ -55,17 +55,7 @@ async function retrieve(){
 				break
 			case 200:
 				const format = await res.json();
-				if(format.is_playing == false){
-					return console.log("no song playing")
-				}
-				if(format.currently_playing_type == 'ad'){
-					return console.log("currently playing ad")
-				}
-				const songName = format.item.name
-				const songLink = format.item.external_urls.spotify
-				isAlbum = true;
-				albumLink = format.context.external_urls.spotify;
-				albumName = format.item.album.name;
+				if(format.currently_playing_type == 'ad'){return console.log("Playing an ad currently.")}
 				let progress = Math.round(format.progress_ms/1000)
 				let pMin = 0;
 				let length = Math.round(format.item.duration_ms/1000)
@@ -89,11 +79,10 @@ async function retrieve(){
 					length = length - 60
 				}
 				const current = {
-					name:songName,
-					link:songLink,
-					isAlbum:isAlbum,
-					albumLink:albumLink,
-					albumName:albumName,
+					name:format.item.name,
+					link:format.item.external_urls.spotify,
+					albumLink:format.context.external_urls.spotify,
+					albumName:format.item.album.name,
 					progressFormatted:`${pMin}:${progress}`,
 					progress:format.progress_ms,
 					lengthFormatted:`${pLen}:${length}`,
