@@ -1,16 +1,44 @@
-/* Load the HTTP library */
+/* Get dependancies and config */
 const http = require("http");
 const fetch = require('node-fetch')
-const { client_id, client_secret, refreshToken } = require('./config.json')
 const request = require('request')
 const fs = require('fs')
+const { client_id, client_secret, refreshToken } = require('./config.json')
+
+/* Function to get token from file */
 async function grabToken(){
   let token = await fs.readFileSync('./token.txt', 'utf8')
   return token
 }
 
-/* Create an HTTP server to handle responses */
-async function no(){
+/* Function to request new access token using refresh token if required */
+async function refresh(){
+  const authOptions = {
+    url: 'https://accounts.spotify.com/api/token',
+    headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
+    form: {
+      grant_type: 'refresh_token',
+      refresh_token: refreshToken
+    },
+    json: true
+  };
+  
+  request.post(authOptions, function(error, response, body) {
+    if (!error && response.statusCode === 200) {
+      var access_token = body.access_token;
+      console.log(access_token)
+      fs.writeFileSync('./token.txt', access_token)
+    }else if(error){
+      console.log(error)
+    }else{
+      console.log(response.statusCode)
+    }
+  });
+}
+
+
+/* Function to grab currently playing song*/
+async function retrieve(){
   try {
     let token = await grabToken()
     let options = await {
@@ -83,28 +111,6 @@ async function no(){
     console.error(err.message);
   }
 }
-async function grab(){
-  const bruh  = await no()
-  return bruh
-}
-async function refresh(){
-  var authOptions = {
-    url: 'https://accounts.spotify.com/api/token',
-    headers: { 'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64')) },
-    form: {
-      grant_type: 'refresh_token',
-      refresh_token: refreshToken
-    },
-    json: true
-  };
-  
-  request.post(authOptions, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      var access_token = body.access_token;
-      console.log(access_token)
-      fs.writeFileSync('./token.txt', access_token)
-    }
-  });
-}
 
-setInterval(() => {grab()}, 5000)
+/* Setting repeating grab */
+setInterval(async () => {await retrieve()}, 5000)
