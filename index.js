@@ -41,16 +41,16 @@ async function refresh(){
 async function retrieve(){
 	try {
 		let token = await grabToken()
-		let options = await {
+		let options = {
 			method:"GET",
 			headers:{Authorization:`Bearer    ${token}`}
 		}
 		const res = await fetch('http://api.spotify.com/v1/me/player/currently-playing', options);
 		switch(res.status){
-			case 401:
+			case 401: //Token expired
 				refresh()
 				break
-			case 204:
+			case 204: //Song not found (no song is playing)
 				return console.log("No song currently playing.")
 				break
 			case 200:
@@ -65,10 +65,12 @@ async function retrieve(){
 					pMin++
 					progress = progress-60
 				}
+				/* Calculate total length */
 				while(length > 60){
 					pLenMinutes++
 					length = length - 60
 				}
+				/* Format all the data into a JSON */
 				const current = {
 					name:format.item.name,
 					link:format.item.external_urls.spotify,
